@@ -62,15 +62,15 @@ func (r Renderer) Render() error {
 	td := TemplateData{
 		buildTitleByComponents(r.changelog.Entries), r.changelog.Version, r.changelog,
 		collectKinds(r.changelog.Entries),
-		collectByKindMap(r.changelog.Entries, BreakingChange),
-		collectByKindMap(r.changelog.Entries, Deprecation),
-		collectByKindMap(r.changelog.Entries, BugFix),
-		collectByKindMap(r.changelog.Entries, Enhancement),
-		collectByKindMap(r.changelog.Entries, Feature),
-		collectByKindMap(r.changelog.Entries, KnownIssue),
-		collectByKindMap(r.changelog.Entries, Security),
-		collectByKindMap(r.changelog.Entries, Upgrade),
-		collectByKindMap(r.changelog.Entries, Other),
+		collectByKind(r.changelog.Entries, BreakingChange),
+		collectByKind(r.changelog.Entries, Deprecation),
+		collectByKind(r.changelog.Entries, BugFix),
+		collectByKind(r.changelog.Entries, Enhancement),
+		collectByKind(r.changelog.Entries, Feature),
+		collectByKind(r.changelog.Entries, KnownIssue),
+		collectByKind(r.changelog.Entries, Security),
+		collectByKind(r.changelog.Entries, Upgrade),
+		collectByKind(r.changelog.Entries, Other),
 	}
 
 	tmpl, err := template.New("asciidoc-release-notes").
@@ -146,25 +146,15 @@ func collectKinds(items []Entry) map[Kind]bool {
 	return kinds
 }
 
-func collectByKindMap(items []Entry, k Kind) map[string][]Entry {
+func collectByKind(entries []Entry, k Kind) map[string][]Entry {
 	componentEntries := map[string][]Entry{}
 
-	for _, e := range items {
+	for _, e := range entries {
 		if e.Kind == k {
-			for _, c := range viper.GetStringSlice("components") {
-				if c != e.Component {
-					continue
-				}
-
+			if len(e.Component) > 0 {
 				componentEntries[e.Component] = append(componentEntries[e.Component], e)
-			}
-		}
-	}
-
-	if len(componentEntries) == 0 {
-		for _, e := range items {
-			if e.Kind == k {
-				componentEntries["unidentified component"] = append(componentEntries[e.Component], e)
+			} else {
+				componentEntries[""] = append(componentEntries[""], e)
 			}
 		}
 	}
@@ -172,53 +162,39 @@ func collectByKindMap(items []Entry, k Kind) map[string][]Entry {
 	return componentEntries
 }
 
-func collectByKind(items []Entry, k Kind) []Entry {
-	entries := []Entry{}
-
-	for _, e := range items {
-		if e.Kind == k {
-			entries = append(entries, e)
-		}
-	}
-
-	return entries
-}
-
 func buildTitleByComponents(entries []Entry) string {
-	matchingComponents := map[string]struct{}{}
-	entriesComponents := map[string]struct{}{}
-	var componentNotFound bool
+	configComponents := viper.GetStringSlice("components")
 
-	for _, e := range entries {
-		if e.Component == "" {
-			componentNotFound = true
-		}
-		for _, c := range viper.GetStringSlice("components") {
-			if c != e.Component {
-				componentNotFound = true
-				continue
+	switch len(configComponents) {
+	case 0:
+		return ""
+	case 1:
+		c := configComponents[0]
+		for _, e := range entries {
+			if c != e.Component && len(e.Component) > 0 {
+				log.Fatalf("Component [%s] not found in config", e.Component)
 			}
-			matchingComponents[c] = struct{}{}
 		}
-	}
-
-	for k := range entriesComponents {
-		if _, ok := matchingComponents[k]; !ok {
-			log.Printf("Component [%s] not found in config", k)
-		}
-	}
-
-	components := []string{}
-	for k := range matchingComponents {
-		components = append(components, k)
-	}
-
-	switch {
-	case len(components) == 0:
-		return "unspecified component"
-	case componentNotFound:
-		return fmt.Sprintf("%s %s", strings.Join(components, " and "), "and unidentified component")
+		return c
 	default:
-		return strings.Join(components, " and ")
+		var match string
+		for _, e := range entries {
+			if e.Component == "" {
+				log.Fatalf("Component cannot be assumed, choose it from config values: %s", e.File.Name)
+			}
+
+			match = ""
+			for _, c := range configComponents {
+				if e.Component != c {
+					continue
+				}
+				match = e.Component
+			}
+
+			if match == "" {
+				log.Printf("Component [%s] not found in config", e.Component)
+			}
+		}
+		return match
 	}
 }

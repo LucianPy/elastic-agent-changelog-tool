@@ -1,0 +1,37 @@
+// begin 0.3.0 relnotes
+
+[[release-notes-0.3.0]]
+== beats 0.3.0
+
+Review important information about the beats 0.3.0 release.
+
+
+
+
+
+[discrete]
+[[new-features-0.3.0]]
+=== New features
+
+The 0.3.0 release adds the following new and notable features.
+
+
+beats::
+
+* Add Url Support For Pr And Issue Fields In Fragments And Changelog. {beats-pull}https://github.com/elastic/elastic-agent-changelog-tool/pull/95[#https://github.com/elastic/elastic-agent-changelog-tool/pull/95] {beats-issue}https://github.com/elastic/elastic-agent-changelog-tool/issues/89[#https://github.com/elastic/elastic-agent-changelog-tool/issues/89]
+
+
+[discrete]
+[[bug-fixes-0.3.0]]
+=== Bug fixes
+
+
+::
+
+* Fix Build Logic For Github Api Calls. {-pull}https://github.com/elastic/elastic-agent-changelog-tool/pull/109[#https://github.com/elastic/elastic-agent-changelog-tool/pull/109] {-issue}https://github.com/elastic/elastic-agent-changelog-tool/issues/108[#https://github.com/elastic/elastic-agent-changelog-tool/issues/108]
+* Fix Build 1. {-pull}https://github.com/elastic/elastic-agent-changelog-tool/pull/109[#https://github.com/elastic/elastic-agent-changelog-tool/pull/109] {-issue}https://github.com/elastic/elastic-agent-changelog-tool/issues/108[#https://github.com/elastic/elastic-agent-changelog-tool/issues/108]
+beats::
+
+* Fix Build 2. {beats-pull}https://github.com/elastic/elastic-agent-changelog-tool/pull/109[#https://github.com/elastic/elastic-agent-changelog-tool/pull/109] {beats-issue}https://github.com/elastic/elastic-agent-changelog-tool/issues/108[#https://github.com/elastic/elastic-agent-changelog-tool/issues/108]
+
+// end 0.3.0 relnotes
